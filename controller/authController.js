@@ -302,7 +302,7 @@ exports.completeProviderSignup = async (req, res) => {
     );
     res.status(201).json({
       success: true,
-      message: "Signup successful",
+      message: "Signup successfull",
       token,
       user: newUser,
     });
@@ -337,7 +337,7 @@ exports.completeUserSignup = async (req, res) => {
     );
     res.status(201).json({
       success: true,
-      message: "Signup successful",
+      message: "Signup successfull",
       token,
       user: newUser,
     });
