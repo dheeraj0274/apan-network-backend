@@ -1,7 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 dotenv.config({path: './config/.env'});
-const connectDB = require('./config/connectDB');
+const connectDB = require('./config/connectdb');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 const app = express();
 const userRoutes = require('./routes/UserRoutes');
 const providerRoutes = require('./routes/ProviderRoutes');
@@ -46,6 +47,8 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/admin', adminRoutes);
 
+
+app.use('/api', feedbackRoutes);
 
 
 

@@ -1,49 +1,39 @@
-
-
-
-
-// module.exports=(req,res,next)=>{
-//     const authHeader = req.headers.authorization
-//    if(!authHeader || !authHeader.startswith("Bearer ")){
-//         return res.status(401).json({ message: "Unauthorized access" });
-//     }
-
-
-//     const token = authHeader.split(" ")[1];
-//     try {
-//         const decoded = jwt.verify(token. process.env.JWT_SECRET);
-//         //   req.user = decoded;
-//         req.user ={ id: decoded._id };
-//           next()
-//     } catch (error) {
-//           res.status(401).json({ success: false, message: "Invalid token" });``
-        
-//     }
-//    }
-
-
-
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const ServiceProvider = require('../models/ServiceProvider');
 
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, message: 'No token provided' });
-  }
-
-  const token = authHeader.split(' ')[1];
-  console.log('received',token);
+exports.verifyUserToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  console.log(token);
   
+  if (!token) return res.status(401).json({ message: 'No token provided (user)' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: decoded.id };
-    console.log(req.user)
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    req.user = user;
     next();
   } catch (err) {
-    return res.status(401).json({ success: false, message: 'Invalid token' });
+    console.error('User token error:', err);
+    return res.status(401).json({ message: 'Invalid token (user)' });
   }
 };
 
-module.exports = authMiddleware;
+exports.verifyProviderToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided (provider)' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const provider = await ServiceProvider.findById(decoded.id).select('-password');
+    if (!provider) return res.status(404).json({ message: 'Service provider not found' });
+
+    req.provider = provider;
+    next();
+  } catch (err) {
+    console.error('Provider token error:', err);
+    return res.status(401).json({ message: 'Invalid token (provider)' });
+  }
+};

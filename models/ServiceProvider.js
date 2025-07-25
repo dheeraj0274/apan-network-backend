@@ -10,7 +10,7 @@ const serviceProviderSchema = new mongoose.Schema({
   password: String,
   location: String,
   skills: [String],
-  aadhar: Number,
+  adhaar: Number,
   village: String,
   experience: Number,
    dob: {

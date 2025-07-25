@@ -68,14 +68,14 @@
 const { completeProviderSignup, aboutProvider }= require('../controller/authController');
 const { createMessage } = require('../controller/authController');
 const { verifyProviderOTP } = require('../controller/authController');
-const authMiddleware = require('../middleware/authMiddleware');
+const {verifyProviderToken }= require('../middleware/authMiddleware');
 
 
 
 router.post('/create',  createMessage);
 router.post('/verifyOTP' , verifyProviderOTP);
 router.post('/complete' , completeProviderSignup);
-router.get('/me',authMiddleware, aboutProvider)
+router.get('/me',verifyProviderToken , aboutProvider);
 
 module.exports = router;
 

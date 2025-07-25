@@ -12,49 +12,64 @@ const ServiceProvider = require("../models/ServiceProvider");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+ const otp = "123456"
 
 exports.createMessage = async (req, res) => {
   console.log(accountSid, authToken);
 
   const { phone } = req.body;
   console.log("Phone number received:", phone);
-  const otp = Math.floor(100000 + Math.random() * 900000);
+ 
   console.log("Generated OTP:", otp);
+
+
+
+  res.status(200).json({
+    success: true,
+    message: "OTP generated successfully",
+    otp, // Include the OTP in the response for testing purposes
+  })
   
 
-  try {
-    const verification = await client.verify.v2
-      .services(process.env.TWILIO_VERIFY_SERVICE_SID)
-      .verifications.create({
-        to: `+91${phone}`,
-        channel: "sms",
-      });
+  // try {
+  //   const verification = await client.verify.v2
+  //     .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+  //     .verifications.create({
+  //       to: `+91${phone}`,
+  //       channel: "sms",
+  //     });
 
-    console.log(`Sent verification: '${verification.sid}'`);
-    res.status(200).json({
-      success: true,
-      message: "Message sent successfully",
-    });
-  } catch (err) {
-    console.error("Error sending message:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to send message",
-      error: err.message,
-    });
-  }
+  //   console.log(`Sent verification: '${verification.sid}'`);
+  //   res.status(200).json({
+  //     success: true,
+  //     message: "Message sent successfully",
+  //   });
+  // } catch (err) {
+  //   console.error("Error sending message:", err);
+  //   res.status(500).json({
+  //     success: false,
+  //     message: "Failed to send message",
+  //     error: err.message,
+  //   });
+  // }
+
+
+
+
+
+
 };
 
 
 exports.verifyProviderOTP = async (req, res) => {
   const { phone, otp  } = req.body;
-  try {
-    const check = await client.verify.v2
-      .services(VERIFY_SERVICE_SID)
-      .verificationChecks.create({
-        to: `+91${phone}`,
-        code: otp,
-      });
+  // try {
+  //   const check = await client.verify.v2
+  //     .services(VERIFY_SERVICE_SID)
+  //     .verificationChecks.create({
+  //       to: `+91${phone}`,
+  //       code: otp,
+  //     });
         //  if(check.status ==="approved")
 
 
@@ -63,24 +78,45 @@ exports.verifyProviderOTP = async (req, res) => {
     
   
   
-    if (check.status === "approved") {
+    // if (check.status === "approved") {
          
          
-      const provider = await ServiceProvider.findOne({phone});
-      if (provider){
-        const token = jwt.sign(
-          { id: provider._id, role: provider.role },
-          process.env.JWT_SECRET,
-          { expiresIn: "7d" }
-        );
+    //   const provider = await ServiceProvider.findOne({phone});
+    //   if (provider){
+    //     const token = jwt.sign(
+    //       { id: provider._id, role: provider.role },
+    //       process.env.JWT_SECRET,
+    //       { expiresIn: "7d" }
+    //     );
 
-        return res.status(200).json({
-          success: true,
-          message: "Login successful",
-          token,
-          provider,
-        });
-      }
+    //     return res.status(200).json({
+    //       success: true,
+    //       message: "Login successful",
+    //       existing: true,
+    //       token,
+    //       provider,
+    //     });
+    //   }
+    try{
+
+    if(otp ==="123456"){
+    const provider = await ServiceProvider.findOne({ phone: `+91${phone}` });
+    if (provider) {
+      const token = jwt.sign(
+        {id:provider._id,role:provider.role},
+        process.env.jwt_secret,
+        { expiresIn: "7d" }
+      );
+      return res.status(200).json({
+        success: true,  
+        message: "Login successful",
+        existing: true,   
+        token,
+        provider,
+      });
+    }
+  }
+    
 
       
       
@@ -90,7 +126,8 @@ exports.verifyProviderOTP = async (req, res) => {
         message: "OTP verified. Please complete signup.",
         phone: `+91${phone}`,
     });
-    }
+  
+    
     
     
     
@@ -104,17 +141,17 @@ exports.verifyProviderOTP = async (req, res) => {
       error: error.message,
     });
   }
-};
+}
 
 exports.verifyUserOTP = async (req, res) => {
   const { phone, otp  } = req.body;
   try {
-    const check = await client.verify.v2
-      .services(VERIFY_SERVICE_SID)
-      .verificationChecks.create({
-        to: `+91${phone}`,
-        code: otp,
-      });
+    // const check = await client.verify.v2
+    //   .services(VERIFY_SERVICE_SID)
+    //   .verificationChecks.create({
+    //     to: `+91${phone}`,
+    //     code: otp,
+    //   });
         //  if(check.status ==="approved")
 
 
@@ -123,7 +160,7 @@ exports.verifyUserOTP = async (req, res) => {
     
   
   
-    if (check.status === "approved") {
+    if (otp==="123456") {
         
          
       const user = await User.findOne({phone});
@@ -137,6 +174,7 @@ exports.verifyUserOTP = async (req, res) => {
         return res.status(200).json({
           success: true,
           message: "Login successful",
+          existing: true,
           token,
           user,
         });
@@ -200,12 +238,12 @@ exports.verifyAdminOTP = async (req,res) => {
 
  
     try {
-    const check = await client.verify.v2
-      .services(VERIFY_SERVICE_SID)
-      .verificationChecks.create({
-        to: `+91${phone}`,
-        code: otp,
-      });
+    // const check = await client.verify.v2
+    //   .services(VERIFY_SERVICE_SID)
+    //   .verificationChecks.create({
+    //     to: `+91${phone}`,
+    //     code: otp,
+    //   });
         //  if(check.status ==="approved")
 
 
@@ -214,7 +252,7 @@ exports.verifyAdminOTP = async (req,res) => {
     
   
   
-    if (check.status === "approved") {
+    if (otp === "123456") {
         
          
       const user = await admin.findOne({phone});
